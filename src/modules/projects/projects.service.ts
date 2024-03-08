@@ -3,6 +3,8 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { Project } from './entities/project.entity';
+import { v2 as cloudinary } from 'cloudinary';
+import { unlink } from 'fs';
 
 @Injectable()
 export class ProjectsService {
@@ -30,6 +32,45 @@ export class ProjectsService {
 
   update(id: number, updateProjectDto: UpdateProjectDto) {
     return `This action updates a #${id} project`;
+  }
+
+  async upload(projectImage: Express.Multer.File, projectImageId: string) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.API_KEY,
+      api_secret: process.env.API_SECRET,
+    });
+
+    const findProjectImage = await this.prisma.project.findFirst({
+      where: { id: projectImageId },
+    });
+
+    if (!findProjectImage) {
+      throw new NotFoundException('Project Image Not Found!');
+    }
+
+    const uploadProjectImage = await cloudinary.uploader.upload(
+      projectImage.path,
+      {
+        resource_type: 'image',
+      },
+      (error, result) => {
+        return result;
+      },
+    );
+
+    const updateProject = await this.prisma.project.update({
+      where: { id: projectImageId },
+      data: {
+        projectImage: uploadProjectImage.secure_url,
+      },
+    });
+
+    unlink(projectImage.path, (error) => {
+      if (error) console.log(error);
+    });
+
+    return updateProject;
   }
 
   async remove(id: string): Promise<void> {

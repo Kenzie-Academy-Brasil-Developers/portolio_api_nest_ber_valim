@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
   HttpCode,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('projects')
 export class ProjectsController {
@@ -31,9 +34,19 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectsService.update(+id, updateProjectDto);
+  @Patch(':id/upload')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'projectImage', maxCount: 1 }]),
+  )
+  upload(
+    @Param('id') id: string,
+    @UploadedFiles()
+    files: {
+      projectImage?: Express.Multer.File[];
+    },
+  ) {
+    const { projectImage } = files;
+    return this.projectsService.upload(projectImage[0], id);
   }
 
   @HttpCode(204)
