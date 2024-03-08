@@ -36,4 +36,5 @@ model ContactIcons{
    contactName String @db.VarChar(200)
    description String?
    contactLink String
+   @@map("contactIcons")
 }
