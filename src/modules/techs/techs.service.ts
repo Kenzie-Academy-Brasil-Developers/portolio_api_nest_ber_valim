@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTechDto } from './dto/create-tech.dto';
 import { UpdateTechDto } from './dto/update-tech.dto';
+import { PrismaService } from 'prisma/prisma.service';
+import { Tech } from './entities/tech.entity';
 
 @Injectable()
 export class TechsService {
-  create(createTechDto: CreateTechDto) {
-    return 'This action adds a new tech';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createTechDto: CreateTechDto): Promise<Tech> {
+    const newTechIcon = Object.assign(new Tech(), createTechDto);
+    await this.prisma.tech.create({ data: { ...newTechIcon } });
+    return newTechIcon;
   }
 
-  findAll() {
-    return `This action returns all techs`;
+  async findAll(): Promise<Tech[]> {
+    const techIcons = await this.prisma.tech.findMany();
+    return techIcons;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tech`;
+  async findOne(id: string): Promise<Tech> {
+    const oneTechIcon = await this.prisma.tech.findUnique({
+      where: { id: id },
+    });
+    if (!oneTechIcon) throw new NotFoundException('Tech Icon Not Found');
+
+    return oneTechIcon;
   }
 
   update(id: number, updateTechDto: UpdateTechDto) {
     return `This action updates a #${id} tech`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tech`;
+  async remove(id: string): Promise<void> {
+    const oneTechIcon = await this.prisma.tech.findUnique({
+      where: { id: id },
+    });
+    if (!oneTechIcon) throw new NotFoundException('Tech Icon Not Found');
+
+    await this.prisma.tech.delete({ where: { id } });
   }
 }
