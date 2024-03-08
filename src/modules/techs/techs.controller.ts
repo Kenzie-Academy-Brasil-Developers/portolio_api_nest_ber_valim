@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
   HttpCode,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { TechsService } from './techs.service';
 import { CreateTechDto } from './dto/create-tech.dto';
 import { UpdateTechDto } from './dto/update-tech.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('techs')
 export class TechsController {
@@ -29,6 +32,19 @@ export class TechsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.techsService.findOne(id);
+  }
+
+  @Patch(':id/upload')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'techIcon', maxCount: 1 }]))
+  upload(
+    @Param('id') id: string,
+    @UploadedFiles()
+    files: {
+      techIcon: Express.Multer.File[];
+    },
+  ) {
+    const { techIcon } = files;
+    return this.techsService.upload(techIcon[0], id);
   }
 
   @Patch(':id')

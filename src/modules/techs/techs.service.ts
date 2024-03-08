@@ -3,6 +3,8 @@ import { CreateTechDto } from './dto/create-tech.dto';
 import { UpdateTechDto } from './dto/update-tech.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { Tech } from './entities/tech.entity';
+import { v2 as cloudinary } from 'cloudinary';
+import { unlink } from 'fs';
 
 @Injectable()
 export class TechsService {
@@ -49,5 +51,44 @@ export class TechsService {
     if (!oneTechIcon) throw new NotFoundException('Tech Icon Not Found');
 
     await this.prisma.tech.delete({ where: { id } });
+  }
+
+  async upload(techIcon: Express.Multer.File, techIconId: string) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.API_KEY,
+      api_secret: process.env.API_SECRET,
+    });
+
+    const findTechIcon = await this.prisma.tech.findFirst({
+      where: { id: techIconId },
+    });
+
+    if (!findTechIcon) {
+      throw new NotFoundException('Tech Icon Not Found!');
+    }
+
+    const uploadTechIcon = await cloudinary.uploader.upload(
+      techIcon.path,
+      {
+        resource_type: 'image',
+      },
+      (error, result) => {
+        return result;
+      },
+    );
+
+    const updateTechIcon = await this.prisma.tech.update({
+      where: { id: techIconId },
+      data: {
+        techIcon: uploadTechIcon.secure_url,
+      },
+    });
+
+    unlink(techIcon.path, (error) => {
+      if (error) console.log(error);
+    });
+
+    return updateTechIcon;
   }
 }
