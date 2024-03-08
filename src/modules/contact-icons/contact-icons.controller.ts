@@ -7,10 +7,13 @@ import {
   Param,
   Delete,
   HttpCode,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { ContactIconsService } from './contact-icons.service';
 import { CreateContactIconDto } from './dto/create-contact-icon.dto';
 import { UpdateContactIconDto } from './dto/update-contact-icon.dto';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('contact-icons')
 export class ContactIconsController {
@@ -29,6 +32,21 @@ export class ContactIconsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.contactIconsService.findOne(id);
+  }
+
+  @Patch(':id/upload')
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'contactIcon', maxCount: 1 }]),
+  )
+  upload(
+    @Param('id') id: string,
+    @UploadedFiles()
+    files: {
+      contactIcon: Express.Multer.File[];
+    },
+  ) {
+    const { contactIcon } = files;
+    return this.contactIconsService.upload(contactIcon[0], id);
   }
 
   @Patch(':id')

@@ -3,6 +3,8 @@ import { CreateContactIconDto } from './dto/create-contact-icon.dto';
 import { UpdateContactIconDto } from './dto/update-contact-icon.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { ContactIcon } from './entities/contact-icon.entity';
+import { v2 as cloudinary } from 'cloudinary';
+import { unlink } from 'fs';
 
 @Injectable()
 export class ContactIconsService {
@@ -45,6 +47,45 @@ export class ContactIconsService {
     });
 
     return updatedContactIcon;
+  }
+
+  async upload(contactIcon: Express.Multer.File, contactIconId: string) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.API_KEY,
+      api_secret: process.env.API_SECRET,
+    });
+
+    const findContactIcon = await this.prisma.contactIcons.findFirst({
+      where: { id: contactIconId },
+    });
+
+    if (!findContactIcon) {
+      throw new NotFoundException('Contact Icon Not Found!');
+    }
+
+    const uploadContactIcon = await cloudinary.uploader.upload(
+      contactIcon.path,
+      {
+        resource_type: 'image',
+      },
+      (error, result) => {
+        return result;
+      },
+    );
+
+    const updateContactIcon = await this.prisma.contactIcons.update({
+      where: { id: contactIconId },
+      data: {
+        contactIcon: uploadContactIcon.secure_url,
+      },
+    });
+
+    unlink(contactIcon.path, (error) => {
+      if (error) console.log(error);
+    });
+
+    return updateContactIcon;
   }
 
   async remove(id: string): Promise<void> {
