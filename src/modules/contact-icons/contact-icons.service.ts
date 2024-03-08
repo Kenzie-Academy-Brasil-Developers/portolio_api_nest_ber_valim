@@ -33,8 +33,18 @@ export class ContactIconsService {
     return oneContactIcon;
   }
 
-  update(id: number, updateContactIconDto: UpdateContactIconDto) {
-    return `This action updates a #${id} contactIcon`;
+  async update(id: string, updateContactIconDto: UpdateContactIconDto) {
+    const oneContact = await this.prisma.contactIcons.findUnique({
+      where: { id: id },
+    });
+    if (!oneContact) throw new NotFoundException('Contact Icon Not Found');
+
+    const updatedContactIcon = await this.prisma.contactIcons.update({
+      where: { id },
+      data: { ...updateContactIconDto },
+    });
+
+    return updatedContactIcon;
   }
 
   async remove(id: string): Promise<void> {

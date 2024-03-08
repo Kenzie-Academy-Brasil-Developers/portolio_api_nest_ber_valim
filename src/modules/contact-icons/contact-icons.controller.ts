@@ -36,7 +36,7 @@ export class ContactIconsController {
     @Param('id') id: string,
     @Body() updateContactIconDto: UpdateContactIconDto,
   ) {
-    return this.contactIconsService.update(+id, updateContactIconDto);
+    return this.contactIconsService.update(id, updateContactIconDto);
   }
 
   @HttpCode(204)

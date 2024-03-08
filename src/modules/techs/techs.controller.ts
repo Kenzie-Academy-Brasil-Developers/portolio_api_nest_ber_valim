@@ -33,7 +33,7 @@ export class TechsController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTechDto: UpdateTechDto) {
-    return this.techsService.update(+id, updateTechDto);
+    return this.techsService.update(id, updateTechDto);
   }
 
   @HttpCode(204)

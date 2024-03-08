@@ -34,6 +34,11 @@ export class ProjectsController {
     return this.projectsService.findOne(id);
   }
 
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
+    return this.projectsService.update(id, updateProjectDto);
+  }
+
   @Patch(':id/upload')
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'projectImage', maxCount: 1 }]),

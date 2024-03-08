@@ -30,8 +30,21 @@ export class ProjectsService {
     return oneProject;
   }
 
-  update(id: number, updateProjectDto: UpdateProjectDto) {
-    return `This action updates a #${id} project`;
+  async update(
+    id: string,
+    updateProjectDto: UpdateProjectDto,
+  ): Promise<Project> {
+    const oneProject = await this.prisma.project.findUnique({
+      where: { id: id },
+    });
+    if (!oneProject) throw new NotFoundException('Project Not Found');
+
+    const updatedProject = await this.prisma.project.update({
+      where: { id },
+      data: { ...updateProjectDto },
+    });
+
+    return updatedProject;
   }
 
   async upload(projectImage: Express.Multer.File, projectImageId: string) {

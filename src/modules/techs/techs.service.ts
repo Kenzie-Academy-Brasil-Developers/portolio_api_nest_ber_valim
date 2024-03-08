@@ -28,8 +28,18 @@ export class TechsService {
     return oneTechIcon;
   }
 
-  update(id: number, updateTechDto: UpdateTechDto) {
-    return `This action updates a #${id} tech`;
+  async update(id: string, updateTechDto: UpdateTechDto): Promise<Tech> {
+    const oneTech = await this.prisma.tech.findUnique({
+      where: { id: id },
+    });
+    if (!oneTech) throw new NotFoundException('Tech Icon Not Found');
+
+    const updatedTech = await this.prisma.tech.update({
+      where: { id },
+      data: { ...updateTechDto },
+    });
+
+    return updatedTech;
   }
 
   async remove(id: string): Promise<void> {
