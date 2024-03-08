@@ -14,13 +14,25 @@ import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBody,
+  ApiExtraModels,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
+import { Project } from './entities/project.entity';
 
+@ApiTags('projects')
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
-
+  @ApiExtraModels(CreateProjectDto)
+  @ApiResponse({
+    status: 201,
+  })
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
+  create(@Body() createProjectDto: CreateProjectDto): Promise<Project> {
     return this.projectsService.create(createProjectDto);
   }
 

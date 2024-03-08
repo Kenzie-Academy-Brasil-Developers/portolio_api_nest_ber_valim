@@ -14,7 +14,9 @@ import { TechsService } from './techs.service';
 import { CreateTechDto } from './dto/create-tech.dto';
 import { UpdateTechDto } from './dto/update-tech.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('techs')
 @Controller('techs')
 export class TechsController {
   constructor(private readonly techsService: TechsService) {}

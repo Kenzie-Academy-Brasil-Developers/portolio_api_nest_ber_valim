@@ -14,7 +14,9 @@ import { ContactIconsService } from './contact-icons.service';
 import { CreateContactIconDto } from './dto/create-contact-icon.dto';
 import { UpdateContactIconDto } from './dto/update-contact-icon.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('contact-icons')
 @Controller('contact-icons')
 export class ContactIconsController {
   constructor(private readonly contactIconsService: ContactIconsService) {}
