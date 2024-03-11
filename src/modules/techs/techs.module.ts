@@ -15,7 +15,11 @@ import { diskStorage } from 'multer';
         },
       }),
       fileFilter: (_, file, callback) => {
-        if (file.mimetype == 'image/jpeg' || file.mimetype == 'image/png') {
+        if (
+          file.mimetype == 'image/jpeg' ||
+          file.mimetype == 'image/png' ||
+          file.mimetype == 'image/svg'
+        ) {
           callback(null, true);
         } else {
           callback(
